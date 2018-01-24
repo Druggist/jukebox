@@ -1,3 +1,4 @@
+#include "jukebox.h"
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
