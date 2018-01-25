@@ -37,7 +37,7 @@ ApplicationWindow {
         }
     }
 
-    Column {
+    Item {
         z: 1
         width: mainWindow.width
         height: mainWindow.height
@@ -63,60 +63,30 @@ ApplicationWindow {
             }
 
             Player {
-                start_time: 5.02
-                duration: 10.12
-                song: "Klocuch - Kruci Gang"
+                id: player
                 width: parent.width
             }
         }
 
-        Grid {
-            columns: 2
-            spacing: 50
-            columnSpacing: parent.width * 0.1
+        Loader{
+            id: votersLoad
+            source: 'VotersGenerator.qml'
+            asynchronous: true
+
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 50
             anchors.horizontalCenter: parent.horizontalCenter
 
-            Voter {
-                song: "Bracia Pierdolec SANFRANCISCO"
-                votes: 15
-                votes_total: 20
+            function reload(){
+                source = '';
+                source = 'VotersGenerator.qml';
             }
-            Voter {
-                song: "Bracia Pierdolec "
-                votes: 15
-                votes_total: 20
-            }
-            Voter {
-                song: "Bracia Pierdolec SANFRANCISCO"
-                votes: 15
-                votes_total: 20
-            }
-            Voter {
-                song: "Bracia Pierdolec SANFRANCISCO"
-                votes: 15
-                votes_total: 20
-            }
-            Voter {
-                song: "Bracia Pierdolec SANFRANCISCO"
-                votes: 15
-                votes_total: 20
-            }
-            Voter {
-                song: "Bracia Pierdolec SANFRANCISCO"
-                votes: 15
-                votes_total: 20
-            }
-            Voter {
-                song: "Bracia Pierdolec SANFRANCISCO"
-                votes: 15
-                votes_total: 20
-            }
-            Voter {
-                song: "Bracia Pierdolec SANFRANCISCO"
-                votes: 15
-                votes_total: 20
+
+            Connections {
+                target: jukebox
+                onResetVoters: {
+                    votersLoad.reload();
+                }
             }
         }
     }

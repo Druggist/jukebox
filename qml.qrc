@@ -4,5 +4,6 @@
         <file>qtquickcontrols2.conf</file>
         <file>Voter.qml</file>
         <file>Player.qml</file>
+        <file>VotersGenerator.qml</file>
     </qresource>
 </RCC>

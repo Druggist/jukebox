@@ -3,10 +3,6 @@ import QtQuick.Controls 2.2
 import QtQuick.Controls.Material 2.2
 
 Item {
-    property double duration: 0
-    property double start_time: 0
-    property string song : ""
-
     id: player
     height: 50
 
@@ -15,30 +11,40 @@ Item {
 
         Label {
             id: title
-            text: song
+            text: jukebox.get_song();
         }
         Row {
             spacing: 5
 
             Label {
-                text: start_time
+                id: elapsed
+                text: jukebox.get_elapsed_time();
                 anchors.verticalCenter: prog.verticalCenter
             }
 
             Slider {
                 id: prog
-                value: start_time
+                value: jukebox.get_player_val();
                 width:  player.width
-                from: 0.0
-                to: duration
                 enabled : false
             }
 
 
             Label {
-                text: duration.toString()
+                id: song_duration
+                text: jukebox.get_total_time();
                 anchors.verticalCenter: prog.verticalCenter
             }
+        }
+    }
+
+    Connections {
+        target: jukebox
+        onUpdatePlayer: {
+            elapsed.text = jukebox.get_elapsed_time();
+            song_duration.text = jukebox.get_total_time();
+            title.text = jukebox.get_song();
+            prog.value = jukebox.get_player_val();
         }
     }
 }
