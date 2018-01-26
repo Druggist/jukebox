@@ -1,21 +1,9 @@
 #include "jukebox.h"
 
-Jukebox::Jukebox(QObject *parent) {
-    this->votes.append({0,"Lorem ipsum",10});
-    this->votes.append({1,"Lorem ipsum",10});
-    this->votes.append({2,"Lorem ipsum",10});
-    this->votes.append({3,"Lorem ipsum",10});
-    this->song = "Bracia Banolec POLE POLE";
-    this->elapsed = QTime(0,0,0);
-    this->total = QTime(0,1,2);
-
-
+Jukebox::Jukebox(QObject *parent) : QObject(parent){
     timer = new QTimer(this);
     connect(timer, SIGNAL (timeout()), this, SLOT (setPlayer()));
-
-    //SET START ON LOAD
-    timer->start(1000);
-    countVotes();
+    this->exit = false;
 }
 
 QString Jukebox::getVoteTitle(int index){
@@ -58,19 +46,29 @@ double Jukebox::getPlayerVal() {
 
 void Jukebox::vote(int index) {
     emit disableVoters();
-    //VOTING IMPLEMENTATION
-
-    emit updateVoters();
+    write(fd, QString::number(index + 200).toStdString().c_str(), 3);
 }
 
 void Jukebox::connectToServer(QString ip) {
-    QHostAddress ipCheck;
-    if(ipCheck.setAddress(ip)) {
-       //CONNECT TO SERVER
-            emit connectSuccess();
-            return;
+    addrinfo hints {};
+    hints.ai_family = AF_INET;
+    hints.ai_protocol = IPPROTO_TCP;
+    addrinfo *resolved;
+
+    if(int err = getaddrinfo(ip.toStdString().c_str(), "12333", &hints, &resolved)) {
+        emit connectFail();
+        return;
     }
-    emit connectFail();
+
+    this->fd = socket(resolved->ai_family, resolved->ai_socktype, resolved->ai_protocol);
+    if(::connect(this->fd, resolved->ai_addr, resolved->ai_addrlen)){
+        emit connectFail();
+        freeaddrinfo(resolved);
+        return;
+    }
+
+    freeaddrinfo(resolved);
+    emit connectSuccess();
 }
 
 void Jukebox::setPlayer() {
@@ -87,3 +85,78 @@ void Jukebox::countVotes() {
     }
     this->totalVotes = sum;
 }
+
+void Jukebox::receiveData() {
+    while(!exit){
+       char header[10];
+       read(fd, header,10);
+       QStringList data = QString(header).split("::");
+       if(data.length() == 2){
+           char *info = new char[data[1].toInt()];
+           read(fd, info, data[1].toInt());
+           parseMessage(data[0].toInt(), QString(info));
+           delete [] info;
+       }
+    }
+}
+
+void Jukebox::setExit(bool exit) {
+    this->exit = exit;
+}
+
+void Jukebox::parseMessage(int code, QString msg) {
+    switch (code / 100) {
+    case 1:
+        switch (code % 100) {
+        case 0:
+            emit resetVoters();
+            break;
+        case 1:
+            this->song = msg;
+            break;
+        case 2:
+            this->elapsed = QTime(0,0,0).addSecs(msg.toInt());
+            break;
+        case 3:
+            this->total = QTime(0,0,0).addSecs(msg.toInt());
+            break;
+        }
+        emit updatePlayer();
+        break;
+    case 3:
+    {
+        int index = code % 100;
+        int voteIndex = findVote(index);
+
+        QString msgTitle = msg.split("::")[0];
+        int msgCount = msg.split("::")[1].toInt();
+
+        if(voteIndex == -1){
+            this->votes.append({index, msgTitle, msgCount});
+            countVotes();
+            emit resetVoters();
+        } else {
+            this->votes[voteIndex] = {index, msgTitle, msgCount};
+            countVotes();
+            emit updateVoters();
+        }
+        break;
+    }
+    }
+}
+
+int Jukebox::findVote(int index) {
+    for(int i=0; i< votes.length(); i++){
+        if(votes[i].index == index) return i;
+    }
+    return -1;
+}
+
+void Jukebox::loadData() {
+    write(fd, QString::number(101).toStdString().c_str(), 3);
+    write(fd, QString::number(102).toStdString().c_str(), 3);
+    write(fd, QString::number(103).toStdString().c_str(), 3);
+    write(fd, QString::number(300).toStdString().c_str(), 3);
+    timer->start(1000);
+}
+

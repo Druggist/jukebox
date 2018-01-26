@@ -6,11 +6,10 @@
 #include <QTime>
 #include <QTimer>
 #include <QVector>
-#include <QHostAddress>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#include <unistd.h>
+#include <netdb.h>
 
-const static int BUFFER_SIZE=4096;
+#include <QDebug>
 
 typedef struct Vote {
     int index;
@@ -33,6 +32,9 @@ public:
     Q_INVOKABLE double getPlayerVal();
     Q_INVOKABLE void vote(int);
     Q_INVOKABLE void connectToServer(QString);
+    void receiveData();
+    void loadData();
+    void setExit(bool);
 
 signals:
     void timerTick();
@@ -48,6 +50,8 @@ public slots:
 
 private:
     void countVotes();
+    void parseMessage(int, QString);
+    int findVote(int);
 
     QVector<Vote> votes;
     QTime elapsed;
@@ -57,8 +61,7 @@ private:
     int totalVotes;
 
     int fd;
-    sockaddr_in addr;
-    char buffer[BUFFER_SIZE];
+    bool exit;
 };
 
 #endif // JUKEBOX_H

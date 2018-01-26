@@ -48,7 +48,7 @@ Item {
                     id: server_ip
                     width: 180
                     height: 50
-                    inputMask: "000.000.000.000;•"
+                    inputMask: "000.000.000.000;"
                     horizontalAlignment: TextInput.AlignHCenter
                 }
 
