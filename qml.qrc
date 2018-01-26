@@ -5,5 +5,7 @@
         <file>Voter.qml</file>
         <file>Player.qml</file>
         <file>VotersGenerator.qml</file>
+        <file>MainView.qml</file>
+        <file>ConnectView.qml</file>
     </qresource>
 </RCC>

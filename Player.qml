@@ -11,20 +11,20 @@ Item {
 
         Label {
             id: title
-            text: jukebox.get_song();
+            text: jukebox.getSong();
         }
         Row {
             spacing: 5
 
             Label {
                 id: elapsed
-                text: jukebox.get_elapsed_time();
+                text: jukebox.getElapsedTime();
                 anchors.verticalCenter: prog.verticalCenter
             }
 
             Slider {
                 id: prog
-                value: jukebox.get_player_val();
+                value: jukebox.getPlayerVal();
                 width:  player.width
                 enabled : false
             }
@@ -32,7 +32,7 @@ Item {
 
             Label {
                 id: song_duration
-                text: jukebox.get_total_time();
+                text: jukebox.getTotalTime();
                 anchors.verticalCenter: prog.verticalCenter
             }
         }
@@ -41,10 +41,10 @@ Item {
     Connections {
         target: jukebox
         onUpdatePlayer: {
-            elapsed.text = jukebox.get_elapsed_time();
-            song_duration.text = jukebox.get_total_time();
-            title.text = jukebox.get_song();
-            prog.value = jukebox.get_player_val();
+            elapsed.text = jukebox.getElapsedTime();
+            song_duration.text = jukebox.getTotalTime();
+            title.text = jukebox.getSong();
+            prog.value = jukebox.getPlayerVal();
         }
     }
 }

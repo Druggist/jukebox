@@ -5,7 +5,7 @@ Grid {
     columnSpacing: 150
 
     Repeater{
-        model:jukebox.get_votes_length();
+        model:jukebox.getVotesLength();
 
         Voter{
         }

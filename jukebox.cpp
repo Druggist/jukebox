@@ -15,64 +15,75 @@ Jukebox::Jukebox(QObject *parent) {
 
     //SET START ON LOAD
     timer->start(1000);
-    count_votes();
+    countVotes();
 }
 
-QString Jukebox::get_vote_title(int index){
+QString Jukebox::getVoteTitle(int index){
     return this->votes[index].title;
 }
 
-QString Jukebox::get_total_time(){
+QString Jukebox::getTotalTime(){
     return this->total.toString("mm:ss");
 }
 
-QString Jukebox::get_elapsed_time(){
+QString Jukebox::getElapsedTime(){
     return this->elapsed.toString("mm:ss");
 }
 
-QString Jukebox::get_song() {
+QString Jukebox::getSong() {
     return this->song;
 }
 
-int Jukebox::get_vote_index(int index) {
+int Jukebox::getVoteIndex(int index) {
     return this->votes[index].index;
 }
 
-int Jukebox::get_vote_count(int index) {
+int Jukebox::getVoteCount(int index) {
     return this->votes[index].count;
 }
 
-int Jukebox::get_votes_length() {
+int Jukebox::getVotesLength() {
     return this->votes.length();
 }
 
 
-int Jukebox::get_total_votes() {
-    return this->total_votes;
+int Jukebox::getTotalVotes() {
+    return this->totalVotes;
 }
 
-double Jukebox::get_player_val() {
-    double player_val = (double)QTime(0, 0, 0).secsTo(this->elapsed) / QTime(0, 0, 0).secsTo(this->total);
-    return (player_val < 1.0) ? player_val : 1.0;
+double Jukebox::getPlayerVal() {
+    double playerVal = (double)QTime(0, 0, 0).secsTo(this->elapsed) / QTime(0, 0, 0).secsTo(this->total);
+    return (playerVal < 1.0) ? playerVal : 1.0;
 }
 
-void Jukebox::vote(int) {
+void Jukebox::vote(int index) {
     emit disableVoters();
     //VOTING IMPLEMENTATION
 
     emit updateVoters();
 }
 
+void Jukebox::connectToServer(QString ip) {
+    QHostAddress ipCheck;
+    if(ipCheck.setAddress(ip)) {
+       //CONNECT TO SERVER
+            emit connectSuccess();
+            return;
+    }
+    emit connectFail();
+}
+
 void Jukebox::setPlayer() {
     this->elapsed = this->elapsed.addSecs(1);
     if(this->elapsed == this->total) timer->stop();
+    else if (this->elapsed.addSecs(10) == this->total) emit disableVoters();
     emit updatePlayer();
 }
 
-void Jukebox::count_votes() {
+void Jukebox::countVotes() {
     int sum = 0;
     foreach (Vote item, this->votes) {
         sum += item.count;
     }
-    this->total_votes = sum;
+    this->totalVotes = sum;
 }
