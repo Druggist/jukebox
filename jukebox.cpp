@@ -124,7 +124,11 @@ void Jukebox::parseMessage(int code, QString msg) {
             this->elapsed = QTime(0,0,0).addSecs(msg.toInt());
             break;
         case 3:
-            this->total = QTime(0,0,0).addSecs(msg.toInt());
+            if(msg.toInt()==-1){
+                usleep(200);
+                write(fd, QString::number(103).toStdString().c_str(), 3);
+            } else
+                this->total = QTime(0,0,0).addSecs(msg.toInt());
             break;
         }
         emit updatePlayer();
