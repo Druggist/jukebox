@@ -3,6 +3,7 @@
 Jukebox::Jukebox(QObject *parent) : QObject(parent){
     timer = new QTimer(this);
     connect(timer, SIGNAL (timeout()), this, SLOT (setPlayer()));
+    timer->start(1000);
     this->exit = false;
 }
 
@@ -73,8 +74,11 @@ void Jukebox::connectToServer(QString ip) {
 
 void Jukebox::setPlayer() {
     this->elapsed = this->elapsed.addSecs(1);
-    if(this->elapsed == this->total) timer->stop();
-    else if (this->elapsed.addSecs(10) == this->total) emit disableVoters();
+    if(this->elapsed == this->total) {
+        loadData();
+        emit updatePlayer();
+        emit resetVoters();
+    } else if (this->elapsed.addSecs(10) >= this->total) emit disableVoters();
     emit updatePlayer();
 }
 
@@ -109,6 +113,8 @@ void Jukebox::parseMessage(int code, QString msg) {
     case 1:
         switch (code % 100) {
         case 0:
+            this->votes.erase(this->votes.begin(), this->votes.end());
+            loadData();
             emit resetVoters();
             break;
         case 1:
@@ -157,6 +163,5 @@ void Jukebox::loadData() {
     write(fd, QString::number(102).toStdString().c_str(), 3);
     write(fd, QString::number(103).toStdString().c_str(), 3);
     write(fd, QString::number(300).toStdString().c_str(), 3);
-    timer->start(1000);
 }
 
